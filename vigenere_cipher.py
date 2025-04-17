@@ -21,6 +21,7 @@ def encrypt_vigenere(msg, key):
         encrypted_text.append(encrypted_char)
     return "".join(encrypted_text)
 
+
 def decrypt_vigenere(msg, key):
     decrypted_text = []
     key = generate_key(msg, key)
