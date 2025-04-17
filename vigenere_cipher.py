@@ -25,7 +25,7 @@ def decrypt_vigenere(msg, key):
     decrypted_text = []
     key = generate_key(msg, key)
     for i in range(len(msg)):
-        char = msg[i]
+        char = msg[i] 
         if char.isupper():
             decrypted_char = chr((ord(char) - ord(key[i]) + 26) % 26 + ord('A'))
         elif char.islower():
