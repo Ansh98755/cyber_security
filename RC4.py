@@ -1,61 +1,47 @@
-def ksa(key):
-    """Key Scheduling Algorithm (KSA)"""
-    key_length = len(key)
-    S = list(range(256))  
+def keyScheduling(key):
+    s = list(range(256))  
+    key_array = [ord(key[i % len(key)]) for i in range(256)] 
     j = 0
+
     for i in range(256):
-        j = (j + S[i] + key[i % key_length]) % 256
-        S[i], S[j] = S[j], S[i]  
-    return S
+        j = (j + s[i] + key_array[i]) % 256
+        s[i], s[j] = s[j], s[i]  
 
-def prga(S):
-    """Pseudo-Random Generation Algorithm (PRGA)"""
-    i = 0
-    j = 0
-    while True:
+    return s 
+
+def pseudo_random_generation_algorithm(s, n):
+    i = j = 0
+    keyStream = []
+
+    for _ in range(n): 
         i = (i + 1) % 256
-        j = (j + S[i]) % 256
-        S[i], S[j] = S[j], S[i]  
-        K = S[(S[i] + S[j]) % 256]
-        yield K
+        j = (j + s[i]) % 256
+        s[i], s[j] = s[j], s[i] 
+        t = (s[i] + s[j]) % 256
+        keyStream.append(s[t]) 
 
-def rc4_encrypt_decrypt(data, key):
-    """Encrypts or decrypts the input data using RC4"""
-    key = [ord(c) for c in key]  
-    S = ksa(key)
-    keystream = prga(S)
-    result = []
+    return keyStream
 
-    for char in data:
-        val = ord(char) ^ next(keystream)  
-        result.append(chr(val))
-    
-    return ''.join(result)
+def rc4_encryption(key_stream, pt):
+    ct = ""
+    for i in range(len(pt)):
+        ct += (chr)(ord(pt[i]) ^ key_stream[i])
+    return ct
+
+def rc4_decryption(key_stream, ct):
+    pt = ""
+    for i in range(len(ct)):
+        pt += (chr)(ord(ct[i]) ^ key_stream[i])
+    return pt
+
 def main():
-    while True:
-        print("\n==== RC4 Encryption/Decryption Menu ====")
-        print("1. Encrypt")
-        print("2. Decrypt")
-        print("3. Exit")
-        choice = input("Enter your choice (1/2/3): ")
+    key = input("Enter Key (only text):")
+    s_array = keyScheduling(key)
+    pt = input("Enter Plain Text :")
+    key_stream = pseudo_random_generation_algorithm(s_array, len(pt))
+    ct = rc4_encryption(key_stream, pt)
+    print("Cipher Text :", ct)
+    pt = rc4_decryption(key_stream, ct)
+    print("Plain Text :", pt)
 
-        if choice == '1':
-            plaintext = input("Enter the text to encrypt: ")
-            key = input("Enter the key: ")
-            encrypted = rc4_encrypt_decrypt(plaintext, key)
-            print("Encrypted Text (in hex):", encrypted.encode().hex())
-        elif choice == '2':
-            hex_data = input("Enter the hex-encoded encrypted text: ")
-            key = input("Enter the key: ")
-            encrypted_bytes = bytes.fromhex(hex_data)
-            encrypted_text = ''.join([chr(b) for b in encrypted_bytes])
-            decrypted = rc4_encrypt_decrypt(encrypted_text, key)
-            print("Decrypted Text:", decrypted)
-        elif choice == '3':
-            print("Exiting program. Goodbye!")
-            break
-        else:
-            print("Invalid choice! Please select 1, 2, or 3.")
-
-if __name__ == "__main__":
-    main()
+main()
