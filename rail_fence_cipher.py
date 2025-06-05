@@ -1,69 +1,48 @@
-def encrypt_rail_fence(text, rails):
-    rail = ['' for _ in range(rails)]
-    direction_down = False
-    row = 0
+def rail_fence_encryption(pt, n):
+    colNumber = len(pt)
+    matrix = [[""]*colNumber for _ in range(n)]
+    row, inc = 0, -1
+    for i in range(0, len(pt)):
+        matrix[row][i] = pt[i]
+        if row == 0 or row == n-1:
+            inc = -inc
+        row += inc
+    ct = ""
+    for i in range(n):
+        ct += "".join(ch for ch in matrix[i])
+    return ct
 
-    for char in text:
-        rail[row] += char
-        if row == 0 or row == rails - 1:
-            direction_down = not direction_down
-        row += 1 if direction_down else -1
-    return ''.join(rail)
-
-def decrypt_rail_fence(cipher, rails):
-    rail = [['\n' for _ in range(len(cipher))] for _ in range(rails)]
-    direction_down = None
-    row, col = 0, 0
-    for i in range(len(cipher)):
-        if row == 0:
-            direction_down = True
-        if row == rails - 1:
-            direction_down = False
-        rail[row][col] = '*'
-        col += 1
-        row += 1 if direction_down else -1
+def rail_cipher_decryption(ct, n):
+    colSize = len(ct)
+    matrix = [['\n'] * colSize for _ in range(n)]
+    row, inc = 0, -1
+    for i in range(colSize):
+        matrix[row][i] = '*'
+        if row == 0 or row == n - 1:
+            inc = -inc
+        row += inc
     index = 0
-    for i in range(rails):
-        for j in range(len(cipher)):
-            if rail[i][j] == '*' and index < len(cipher):
-                rail[i][j] = cipher[index]
+    for i in range(n):
+        for j in range(colSize):
+            if matrix[i][j] == '*' and index < len(ct):
+                matrix[i][j] = ct[index]
                 index += 1
-    result = []
-    row, col = 0, 0
-    for i in range(len(cipher)):
-        if row == 0:
-            direction_down = True
-        if row == rails - 1:
-            direction_down = False
-        if rail[row][col] != '\n':
-            result.append(rail[row][col])
-            col += 1
-        row += 1 if direction_down else -1
 
-    return ''.join(result)
-def main():
-    while True:
-        print("\n==== Rail Fence Cipher Menu ====")
-        print("1. Encrypt")
-        print("2. Decrypt")
-        print("3. Exit")
-        choice = input("Enter your choice (1/2/3): ")
+    result = ""
+    row, inc = 0, -1
+    for i in range(colSize):
+        result += matrix[row][i]
+        if row == 0 or row == n - 1:
+            inc = -inc
+        row += inc
+    return result
 
-        if choice == '1':
-            text = input("Enter the text to encrypt: ")
-            rails = int(input("Enter the number of rails: "))
-            encrypted = encrypt_rail_fence(text, rails)
-            print("Encrypted Text:", encrypted)
-        elif choice == '2':
-            cipher = input("Enter the text to decrypt: ")
-            rails = int(input("Enter the number of rails: "))
-            decrypted = decrypt_rail_fence(cipher, rails)
-            print("Decrypted Text:", decrypted)
-        elif choice == '3':
-            print("Exiting program. Goodbye!")
-            break
-        else:
-            print("Invalid choice! Please select 1, 2, or 3.")
+def rail_fence_cipher():
+    message = input("Enter message to encrypt :")
+    n = int(input("Enter Rail Fence Value :"))
+    cipher_text = rail_fence_encryption(message, n)
+    print("Cipher Text :" + cipher_text)
+    plain_text = rail_cipher_decryption(cipher_text, n)
+    print("Plain Text :" + plain_text)
 
-if __name__ == "__main__":
-    main()
+rail_fence_cipher()
